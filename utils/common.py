@@ -1,16 +1,16 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    utils.common
+    ~~~~~~~~~~~~
+
+    Implements common helpers
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import sys
 import datetime
 import hashlib
@@ -27,22 +27,29 @@ def convert_timestamp(stamp):
     return processed_date
 
 
-#
-# 61 -> 1'1''
-#
 def convert_time(seconds):
+    """
+    Seconds to minute/second
+    Ex: 61 -> 1′1″
+    :param seconds:
+    :return:
+    :link: https://en.wikipedia.org/wiki/Prime_(symbol)
+    """
     one_minute = 60
     minute = seconds / one_minute
     if minute == 0:
-        return str(seconds % one_minute) + "'"
+        return str(seconds % one_minute) + "″"
     else:
-        return str(minute) + "''" + str(seconds % one_minute) + "'"
+        return str(minute) + "′" + str(seconds % one_minute) + "″"
 
 
-#
-# 123456 -> 123,456
-#
 def convert_number(number):
+    """
+    Convert number to , split
+    Ex: 123456 -> 123,456
+    :param number:
+    :return:
+    """
     if number is None or number == 0:
         return 0
     number = int(number)
@@ -50,10 +57,21 @@ def convert_number(number):
 
 
 def md5(content):
+    """
+    MD5 Hash
+    :param content:
+    :return:
+    """
     return hashlib.md5(content).hexdigest()
 
 
 def allowed_file(filename):
+    """
+    Allowd upload file
+    Config Path: ./config [upload]
+    :param filename:
+    :return:
+    """
     config_extension = config.Config('upload', 'extensions').value
     if config_extension == '':
         log.critical('Please set config file upload->directory')

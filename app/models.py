@@ -1,16 +1,16 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    app.models
+    ~~~~~~~~~~
+
+    Implements models
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 
 import time
 from sqlalchemy.schema import UniqueConstraint, Index
@@ -79,8 +79,9 @@ class CobraRules(db.Model):
     id = db.Column(INTEGER, primary_key=True, autoincrement=True, nullable=False)
     vul_id = db.Column(TINYINT, nullable=True, default=None, index=True)
     language = db.Column(TINYINT, nullable=True, default=None, index=True)
-    regex = db.Column(db.String(512), nullable=False, default=None)
-    regex_confirm = db.Column(db.String(512), nullable=False, default=None)
+    regex_location = db.Column(db.String(512), nullable=False, default=None)
+    regex_repair = db.Column(db.String(512), nullable=False, default=None)
+    block_repair = db.Column(TINYINT(2), nullable=False, default=None)
     description = db.Column(db.String(256), nullable=False, default=None)
     repair = db.Column(db.String(512), nullable=False, default=None)
     status = db.Column(TINYINT(2), nullable=False, default=None)
@@ -88,11 +89,12 @@ class CobraRules(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=None)
     updated_at = db.Column(db.DateTime, nullable=False, default=None)
 
-    def __init__(self, vul_id, language, regex, regex_confirm, description, repair, status, level, created_at=None, updated_at=None):
+    def __init__(self, vul_id, language, regex_location, regex_repair, block_repair, description, repair, status, level, created_at=None, updated_at=None):
         self.vul_id = vul_id
         self.language = language
-        self.regex = regex
-        self.regex_confirm = regex_confirm
+        self.regex_location = regex_location
+        self.regex_repair = regex_repair
+        self.block_repair = block_repair
         self.description = description
         self.repair = repair
         self.status = status
@@ -213,18 +215,24 @@ class CobraProjects(db.Model):
     __table_args__ = ({"mysql_charset": "utf8mb4"})
 
     id = db.Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True, nullable=False)
-    repository = db.Column(db.String(512), nullable=False, default=None, index=True)
+    repository = db.Column(db.String(512), nullable=False, default=None)
+    url = db.Column(db.String(512), nullable=False, default=None)
     name = db.Column(db.String(50), nullable=False, default=None)
     author = db.Column(db.String(50), nullable=False, default=None)
+    framework = db.Column(db.String(32), nullable=False, default=None)
+    pe = db.Column(db.String(32), nullable=False, default=None)
     remark = db.Column(db.String(512), nullable=False, default=None)
     last_scan = db.Column(db.DateTime, nullable=False, default=None)
     created_at = db.Column(db.DateTime, nullable=False, default=None)
     updated_at = db.Column(db.DateTime, nullable=False, default=None)
 
-    def __init__(self, repository, name, author, remark, last_scan, created_at=None, updated_at=None):
+    def __init__(self, repository, url, name, author, framework, pe, remark, last_scan, created_at=None, updated_at=None):
         self.repository = repository
+        self.url = url
         self.name = name
         self.author = author
+        self.framework = framework
+        self.pe = pe
         self.remark = remark
         self.last_scan = last_scan
         self.created_at = created_at

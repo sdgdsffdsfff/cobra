@@ -1,16 +1,16 @@
-#!/usr/bin/env python
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    pickup.directory
+    ~~~~~~~~~~~~~~~~
+
+    Implements various directory
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import time
 import os
 from utils import log
@@ -54,7 +54,7 @@ class Directory:
         t1 = time.clock()
         self.files(self.path)
         self.result['no_extension'] = {'file_count': 0, 'file_list': []}
-        for extension, values in self.type_nums.iteritems():
+        for extension, values in self.type_nums.items():
             extension = extension.strip()
             self.result[extension] = {'file_count': len(values), 'file_list': []}
             # .php : 123

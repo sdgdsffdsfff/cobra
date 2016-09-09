@@ -1,22 +1,21 @@
-#!/usr/bin/env python
-# coding: utf-8
-#
-# Copyright 2016 Feei. All Rights Reserved
-#
-# Author:   Feei <wufeifei@wufeifei.com>
-# Homepage: https://github.com/wufeifei/cobra
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-# See the file 'doc/COPYING' for copying permission
-#
+# -*- coding: utf-8 -*-
+
+"""
+    controller.api
+    ~~~~~~~~~~~~~~
+
+    Implements api for app controller
+
+    :author:    Feei <wufeifei#wufeifei.com>
+    :homepage:  https://github.com/wufeifei/cobra
+    :license:   MIT, see LICENSE for more details.
+    :copyright: Copyright (c) 2016 Feei. All rights reserved
+"""
 import os
 from utils import config, common
 from flask import request, jsonify
 from werkzeug.utils import secure_filename
-from app import web, CobraAuth, CobraTaskInfo
+from app import web, CobraAuth, CobraTaskInfo, CobraProjects
 from engine import scan
 
 # default api url
@@ -41,7 +40,7 @@ def add_task():
         }
     :return:
         The return value also in json format, usually is:
-        {"code": 1001, "msg": "error reason or success."}
+        {"code": 1001, "result": "error reason or success."}
         code: 1005: Unknown Protocol
         code: 1004: Unknown error, if you see this error code, most time is cobra's database error.
         code: 1003: You support the parameters is not json.
@@ -50,25 +49,35 @@ def add_task():
     """
     data = request.json
     if not data or data == "":
-        return jsonify(code=1003, msg=u'Only support json, please post json data.')
+        return jsonify(code=1003, result=u'Only support json, please post json data.')
 
     key = data.get('key')
 
     auth = CobraAuth.query.filter_by(key=key).first()
     if auth is None:
-        return jsonify(code=4002, msg=u'Key verify failed')
+        return jsonify(code=4002, result=u'Key verify failed')
     target = data.get('target')
     branch = data.get('branch')
     new_version = data.get('new_version')
     old_version = data.get('old_version')
 
+    project_id = data.get('project_id')
+    if project_id:
+        project = CobraProjects.query.filter_by(id=project_id).first()
+        if not project:
+            return jsonify(code=1002, result=u'not find the project.')
+        target = project.repository
+        branch = 'master'
+        new_version = ""
+        old_version = ""
+
     # verify key
     if not key or key == "":
-        return jsonify(code=1002, msg=u'key can not be empty.')
+        return jsonify(code=1002, result=u'key can not be empty.')
     if not target or target == "":
-        return jsonify(code=1002, msg=u'url can not be empty.')
+        return jsonify(code=1002, result=u'url can not be empty.')
     if not branch or branch == "":
-        return jsonify(code=1002, msg=u'branch can not be empty.')
+        return jsonify(code=1002, result=u'branch can not be empty.')
 
     code, result = scan.Scan(target).version(branch, new_version, old_version)
     return jsonify(code=code, result=result)
@@ -80,7 +89,7 @@ def status_task():
     key = request.json.get('key')
     auth = CobraAuth.query.filter_by(key=key).first()
     if auth is None:
-        return jsonify(code=4002, msg=u'Key verify failed')
+        return jsonify(code=4002, result=u'Key verify failed')
     c = CobraTaskInfo.query.filter_by(id=scan_id).first()
     if not c:
         return jsonify(status=4004)
@@ -106,12 +115,12 @@ def upload_file():
     # check if the post request has the file part
     if 'file' not in request.files:
         return jsonify(code=1002, result="File can't empty!")
-    file = request.files['file']
-    if file.filename == '':
+    file_instance = request.files['file']
+    if file_instance.filename == '':
         return jsonify(code=1002, result="File name can't empty!")
-    if file and common.allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(os.path.join(config.Config('upload', 'directory').value, 'uploads'), filename))
+    if file_instance and common.allowed_file(file_instance.filename):
+        filename = secure_filename(file_instance.filename)
+        file_instance.save(os.path.join(os.path.join(config.Config('upload', 'directory').value, 'uploads'), filename))
         # scan job
         code, result = scan.Scan(filename).compress()
         return jsonify(code=code, result=result)
